@@ -12,13 +12,6 @@ restoreUserProgress <- function(e, selection)UseMethod("restoreUserProgress")
 loadLesson <- function(e, ...)UseMethod("loadLesson")
 loadInstructions <- function(e, ...)UseMethod("loadInstructions")
 
-USERS.FILE = "/Users/derekmanierre/desktop/users.csv"
-
-## added by Derek for login
-setwd("/Users/derekmanierre/Desktop/swirl/R")
-options(stringsAsFactors = FALSE)
-security_ques = c("What is your ECSU ID Number? ","What is the name of your hometown? ",
-                  "Paper or Plastic? ","What is your Mom's name? ")
 
 # Default course and lesson navigation logic
 # 
@@ -255,26 +248,7 @@ welcome.default <- function(e, ...){
               skip_after = TRUE)
     resp <- readline(s()%N%"What shall I call you? ")
   }
-
-  response = -1
-
-  if (response!=0) {
-  # Ask if new or returning user
-  repeat{
-    response <- readline("Are you a new user? \n  1: New User \n 2: Current User\n")
  
-    if(response == 1 | response == 2){
-      break;
-    }
-  }
-
-  if(response == 1){
-    new_user()
-  } else if(response == 2){
-    log_in()
-  }
-
-}
   return(resp)
 }
 
@@ -457,9 +431,10 @@ getUser.default <- function(){"swirladmin"}
 
 
 # Log In Function
-log_in <- function(){
+# FIX ME: the log_in function has a parameter for the file
+log_in <- function(file_name){
   check_user = paste("","",sep = "")
-  users <- read.csv(USERS.FILE)
+  users <- read.csv(file_name)
   repeat{
     check_user <- readline("Please enter your username:")
     if(check_user %in% users$Username ==TRUE){ break; }
@@ -478,11 +453,31 @@ log_in <- function(){
   }
 }
 
+promptPassword <-function(file_name) {
+  response = -1
+  if (response!=0) {
+    # Ask if new or returning user
+    repeat{
+      response <- readline("Are you a new user? \n  1: New User \n 2: Current User\n")
+      
+      if(response == 1 | response == 2){
+          break;
+      }
+    }
+    if(response == 1){
+      new_user(file_name)
+    } else if(response == 2){
+      log_in(file_name)
+    }
+  }
+}
+
+
+
 # New User Function
-new_user <- function(){
-   print("current directory: ")
-   print(getwd())
-   users = read.csv(USERS.FILE)
+new_user <- function(file_name){
+  options(stringsAsFactors = FALSE)
+   users = read.csv(file_name)
   repeat{
     user_name <- readline("Please enter the username assigned by your instructor:")
     if(user_name %in% users$Username == TRUE){
@@ -498,9 +493,9 @@ new_user <- function(){
 
   user_info = c(user_name,pass_word,ques_no,ques_answer)
 
-  users <- read.csv(USERS.FILE)
+  users <- read.csv(file_name)
   users = rbind(users,user_info)
-  write.csv(users,"users.csv",row.names = FALSE)
+  write.csv(users,file_name,row.names = FALSE)
   log_in()
 }
 
