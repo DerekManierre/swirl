@@ -431,7 +431,6 @@ getUser.default <- function(){"swirladmin"}
 
 
 # Log In Function
-# FIX ME: the log_in function has a parameter for the file
 log_in <- function(file_name){
   check_user = paste("","",sep = "")
   users <- read.csv(file_name)
@@ -453,7 +452,7 @@ log_in <- function(file_name){
   }
 }
 
-promptPassword <-function(file_name) {
+promptPassword <-function(file_name,security_ques) {
   response = -1
   if (response!=0) {
     # Ask if new or returning user
@@ -465,7 +464,7 @@ promptPassword <-function(file_name) {
       }
     }
     if(response == 1){
-      new_user(file_name)
+      new_user(file_name, security_ques)
     } else if(response == 2){
       log_in(file_name)
     }
@@ -475,7 +474,7 @@ promptPassword <-function(file_name) {
 
 
 # New User Function
-new_user <- function(file_name){
+new_user <- function(file_name,security_ques){
   options(stringsAsFactors = FALSE)
    users = read.csv(file_name)
   repeat{
@@ -486,17 +485,15 @@ new_user <- function(file_name){
       break;
     }
     }
-  pass_word <- readline("Please enter a user password:")
+  pass_word <- readline("Please enter a password:")
 
   ques_no <- sample(1:4, 1)
   ques_answer <- readline(paste("Security Question:",security_ques[ques_no]))
 
-  user_info = c(user_name,pass_word,ques_no,ques_answer)
+  user_info = c(user_name,pass_word,ques_no,ques_answer,"1")
 
   users <- read.csv(file_name)
   users = rbind(users,user_info)
   write.csv(users,file_name,row.names = FALSE)
-  log_in()
+  log_in(file_name)
 }
-
-

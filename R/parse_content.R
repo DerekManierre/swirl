@@ -64,42 +64,33 @@ parse_content.yaml <- function(file, e){
   }
   
   
-  if (0) {
   USERS.FILE = "/Users/derekmanierre/desktop/users.csv"
   
   ## added by Derek for login
   setwd("/Users/derekmanierre/Desktop/swirl/R")
-  security_ques = c("What is your ECSU ID Number? ","What is the name of your hometown? ",
-                    "Paper or Plastic? ","What is your Mom's name? ")
+  security_ques = c("What was the name of your first pet? ","What is the name of your hometown? ",
+                    "What is the name of your elementary school? ","What is your Mom's name? ")
   files <- list.files("/Users/derekmanierre/desktop/",pattern = "users.csv$")
   users_Is_Found <<- -1
-  cat("users_Is_Found = ", users_Is_Found, ", checking file...\n")
   if(length(files) == 1){
     users_Is_Found <<- 0
   }
 
-    cat("users_Is_Found = ", users_Is_Found, "\n")
-  } # END if (0)
     
 
   raw_yaml <- yaml.load_file(file)
   raw_yaml <- wrap_encoding(raw_yaml)
   
   
-  ## FIX ME: look at raw_yaml here to determine whether to promptPassword
   meta = raw_yaml[[1]]
   USERS.FILE = meta$UsersFile
   
   
   if(is.null(USERS.FILE) == FALSE)  {
-    promptPassword(USERS.FILE)
+    promptPassword(USERS.FILE, security_ques)
   }
   
   #save(raw_yaml, file = "raw_yaml.RData")
-  
-  # FIX ME: modify promptPassword to have a parameter for the
-  # name of the file
-  # promptPassword()
   
   
   temp <- lapply(raw_yaml[-1], newrow)
