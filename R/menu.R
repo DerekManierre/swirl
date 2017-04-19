@@ -1,3 +1,5 @@
+#TO DO: New User Function changes the column names which makes the .csv file unreadable
+
 ## Method declarations
 
 mainMenu <- function(e, ...)UseMethod("mainMenu")
@@ -431,7 +433,8 @@ getUser.default <- function(){"swirladmin"}
 
 
 # Log In Function
-log_in <- function(file_name){
+log_in <- function(file_name,security_ques){
+  options(stringsAsFactors = FALSE)
   check_user = paste("","",sep = "")
   users <- read.csv(file_name)
   repeat{
@@ -445,6 +448,23 @@ log_in <- function(file_name){
     use_row <- which(users$Username == check_user )
     if(check_passwrd == users[use_row,2]){
       print("Weclome!")
+      if(users[use_row,5] == 1){
+        temp <- first_login(security_ques)
+        new_pass <-temp[1]
+        ques_num <-temp[2]
+        ques_answer <-temp[3]
+        users[use_row,2] <- new_pass
+        users[use_row,3] <- ques_num
+        users[use_row,4] <- ques_answer
+        users[use_row,5] <- 0
+        write.csv(users,file_name,row.names = FALSE)
+      }else{
+        pass_change <- readline("Would you like to change your password? \n 1:Yes \n 2:No")
+        if(pass_change == 1){
+          change_pass(users,use_row,security_ques,file_name)
+        }
+      }
+      
       break; }
     else {
       print("Password incorrect. Try again...")
@@ -464,19 +484,20 @@ promptPassword <-function(file_name,security_ques) {
       }
     }
     if(response == 1){
-      new_user(file_name, security_ques)
+      new_user(file_name,security_ques)
     } else if(response == 2){
-      log_in(file_name)
+      log_in(file_name,security_ques)
     }
   }
 }
 
 
 
+
 # New User Function
 new_user <- function(file_name,security_ques){
   options(stringsAsFactors = FALSE)
-   users = read.csv(file_name)
+  users = read.csv(file_name)
   repeat{
     user_name <- readline("Please enter the username assigned by your instructor:")
     if(user_name %in% users$Username == TRUE){
@@ -484,16 +505,64 @@ new_user <- function(file_name,security_ques){
     }else{
       break;
     }
+  }
+  pass_word <- readline("Please enter a user password:")
+  if(pass_word ==""){
+    while(pass_word ==""){
+      pass_word <- readline("Sorry, you didn't enter anything,please enter your new password: ")
     }
-  pass_word <- readline("Please enter a password:")
-
-  ques_no <- sample(1:4, 1)
-  ques_answer <- readline(paste("Security Question:",security_ques[ques_no]))
-
-  user_info = c(user_name,pass_word,ques_no,ques_answer,"1")
-
+  }
+  
+  ques_num = ""
+  ques_answer = ""
+  
+  user_info = c(user_name,pass_word,ques_num,ques_answer,1)
+  
   users <- read.csv(file_name)
   users = rbind(users,user_info)
   write.csv(users,file_name,row.names = FALSE)
-  log_in(file_name)
+  log_in(file_name,security_ques)
 }
+
+#change_pass Function
+change_pass <- function(users,use_row,security_ques,file_name){
+  options(stringsAsFactors = FALSE)
+  seq_number <- users[use_row,3]
+  print("Please answer your security question.")
+  answer <- readline(security_ques[seq_number])
+  while(answer != users[use_row,4]){
+    answer <- readline("Sorry, that answer was incorrect, please try again: ")
+  }
+  new_pass <- readline("Please enter your new password: ")
+  if(new_pass ==""){
+    while(new_pass ==""){
+      new_pass <- readline("Sorry, you didn't enter anything,please enter your new password: ")
+    }
+  }
+  users[use_row,2] <- new_pass
+  write.csv(users,file_name,row.names = FALSE)
+}
+
+#first_login Function
+first_login <- function(security_ques){
+  options(stringsAsFactors = FALSE)
+  print("Since it is your first time logging in you must change your password.")
+  new_password <- readline("Please enter your new password: ")
+  if(new_password ==""){
+    while(new_password ==""){
+      new_password <- readline("Sorry, you didn't enter anything,please enter your new password: ")
+    }
+  }
+  check_password <- readline("Please enter your password again: ")
+  while(new_password != check_password){
+    check_password <- readline("Sorry, that password didn't match, please try again: ")
+  }
+  print("Please enter the number of the security question you would like to use: ")
+  for(x in 1:4){
+    print(paste(x, " ", security_ques[x]))
+  }
+  ques_num <- readline("Question Number: ")
+  ques_answer <- readline("Please enter the answer to your question: ")
+  return(c(new_password,ques_num,ques_answer))
+}
+
